@@ -1,23 +1,22 @@
 import csv
+from prettytable import PrettyTable
 
-
+table = PrettyTable(["Room Number", "Room Type"])
 
 def main():
 
     available = open_available_rooms()
 
-    print(available)
-
     unavailable = open_unavailable_rooms()
-
-    print(unavailable)
 
     print("These are the available rooms to book")
 
     available_rooms_display = show_available_rooms(available, unavailable)
 
     for room in available_rooms_display:
-        print(f"Room number {room['number']} -> {room['type']}")
+        table.add_row([room['number'], room['type']])
+
+    print(table)
 
     number = input("Pick a room number: ")
 
@@ -26,18 +25,23 @@ def main():
 
 def open_available_rooms():
 
-    with open("available.csv", "r") as file:
-        reader = csv.DictReader(file)
+    try:
 
-        rooms = [row for row in reader]
+        with open("available.csv", "r") as file:
+            reader = csv.DictReader(file)
 
-        return rooms
+            rooms = [row for row in reader]
+
+            return rooms
+    
+    except FileNotFoundError:
+        print("File not found")
+        return []
 
 
 def open_unavailable_rooms():
 
     try:
-
 
         with open("unavailable.csv", "r") as file:
 
@@ -55,13 +59,7 @@ def show_available_rooms(available, unavailable):
 
     unavailable_room_number = [room["number"] for room in unavailable]
 
-    print(unavailable_room_number)
-
-    available_room_number = [room for room in available if room["number"] not in unavailable_room_number]
-
-    print(available_room_number)
-
-    return(available_room_number)
+    return [room for room in available if room["number"] not in unavailable_room_number]
 
 
 def book_room(room_num):
@@ -89,7 +87,6 @@ def book_room(room_num):
 
 
                 print(f"Room {room_num} booked!")
-                print(unavailable)
                 return
 
     print("Room not found")
