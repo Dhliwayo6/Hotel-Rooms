@@ -75,9 +75,9 @@ def book_room(room_num):
 
             unavailable.append(room)
 
-            with open("unavailable.csv", "w") as file:
+            with open("unavailable.csv", "w", newline="") as file:
 
-                writer = csv.DictWriter(file, fieldnames=["number", "type"])
+                writer = csv.DictWriter(file, fieldnames=["number", "type", "price"])
                 writer.writeheader()
 
                 # writer.writerows(unavailable)
