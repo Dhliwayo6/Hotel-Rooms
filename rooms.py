@@ -44,7 +44,7 @@ def main():
 
     total_cost = stay_cost(nights_spent, price)
 
-    print(f"The cost of your stay is ZAR {total_cost:,.2f}")
+    print(f"Your stay for {nights_spent} night(s) is ZAR {total_cost:,.2f}")
 
     book_room(number)
 
@@ -108,6 +108,7 @@ def book_room(room_num):
         if room["number"] == room_num:
 
             unavailable.append(room)
+            room_type = room['type']
 
             with open("unavailable.csv", "w", newline="") as file:
 
@@ -120,7 +121,7 @@ def book_room(room_num):
                     writer.writerow(room)
 
 
-                print(f"Room {room_num} booked!")
+                print(f"Room {room_num}, a {room_type} room booked!")
                 return
 
     print("Room not found")
