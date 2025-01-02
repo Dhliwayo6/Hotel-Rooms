@@ -1,7 +1,9 @@
 import csv
+import calendar
+from datetime  import date
 from prettytable import PrettyTable
 
-table = PrettyTable(["Room Number", "Room Type"])
+table = PrettyTable(["Room Number", "Room Type", "Price"])
 
 def main():
 
@@ -14,11 +16,35 @@ def main():
     available_rooms_display = show_available_rooms(available, unavailable)
 
     for room in available_rooms_display:
-        table.add_row([room['number'], room['type']])
+        table.add_row([room['number'], room['type'], room['price']])
 
     print(table)
 
+    current_date = date.today()
+
+    current_date = str(current_date)
+
+    year, month, day = current_date.split("-")
+
+
     number = input("Pick a room number: ")
+
+
+    price = room_price(available, number)
+
+    print(calendar.month(int(year), int(month)))
+
+    check_in = int(input("Please choose a check-in date: "))
+
+    print(calendar.month(int(year), int(month)))
+
+    check_out = int(input("Please choose a check-out date: "))
+
+    nights_spent = check_out - check_in
+
+    total_cost = stay_cost(nights_spent, price)
+
+    print(f"The cost of your stay is ZAR {total_cost:,.2f}")
 
     book_room(number)
 
@@ -61,6 +87,14 @@ def show_available_rooms(available, unavailable):
 
     return [room for room in available if room["number"] not in unavailable_room_number]
 
+def room_price(available, room_number):
+    for room in available:
+        if room["number"] == room_number:
+            return int(room['price'])
+
+def stay_cost(nights, price_per_night):
+
+    return nights * price_per_night
 
 def book_room(room_num):
 
