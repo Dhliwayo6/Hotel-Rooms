@@ -7,6 +7,26 @@ table = PrettyTable(["Room Number", "Room Type", "Price"])
 
 def main():
 
+    guest = {}
+
+    name = input("Please enter your name ")
+
+    surname = input("Please enter your surname ")
+
+    email = input("please enter your email adddress ")
+
+    guest["name"] = name
+
+    guest["surname"] = surname
+
+    guest["email"] = email
+
+    
+
+    clients = [guest]
+
+    register(clients)
+
     available = open_available_rooms()
 
     unavailable = open_unavailable_rooms()
@@ -59,6 +79,16 @@ def main():
 
     book_room(number, check_in_date, check_out_date)
 
+def register(guest_list):
+
+    with open("guests.csv", "w", newline="") as guests:
+
+        writer = csv.DictWriter(guests, fieldnames=["name", "surname", "email"])
+        writer.writeheader()
+
+        writer.writerows(guest_list)
+
+        
 
 def open_available_rooms():
 
