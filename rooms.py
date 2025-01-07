@@ -7,25 +7,44 @@ table = PrettyTable(["Room Number", "Room Type", "Price"])
 
 def main():
 
-    guest = {}
+    while True:
 
-    name = input("Please enter your name ")
 
-    surname = input("Please enter your surname ")
+        guest = {}
 
-    email = input("please enter your email adddress ")
+        name = input("Please enter your name ")
 
-    guest["name"] = name
+        surname = input("Please enter your surname ")
 
-    guest["surname"] = surname
+        email = input("Please enter your email adddress ")
 
-    guest["email"] = email
+        guest["name"] = name
 
-    
+        guest["surname"] = surname
 
-    clients = [guest]
+        guest["email"] = email
 
-    register(clients)
+        
+
+        clients = [guest]
+
+        register(clients)
+
+        print("Please login to book a room with us")
+
+        login_name = input("Enter your name ")
+
+        login_email = input("Enter your email ")
+
+        if client_login(clients, login_name, login_email):
+            print("Login successful")
+            while not client_login(clients, login_name, login_email):
+                print("Details do not exist, try again.")
+            break
+
+        
+
+
 
     available = open_available_rooms()
 
@@ -88,7 +107,18 @@ def register(guest_list):
 
         writer.writerows(guest_list)
 
-        
+def client_login(guest_list, name, email):
+    
+
+    for item in guest_list:
+        print(item)
+
+        if item["name"] == name and item["email"] == email:
+            return True
+       
+    return False
+
+
 
 def open_available_rooms():
 
