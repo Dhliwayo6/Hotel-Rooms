@@ -29,16 +29,27 @@ def main():
 
     number = input("Pick a room number: ")
 
-
     price = room_price(available, number)
 
     print(calendar.month(int(year), int(month)))
 
-    check_in = int(input("Please choose a check-in date: "))
+    try:
+
+
+        check_in = int(input("Please choose a check-in date: "))
+
+    except ValueError:
+
+        print("Not a valid date")
+
 
     print(calendar.month(int(year), int(month)))
 
     check_out = int(input("Please choose a check-out date: "))
+
+    check_in_date = year + "-" + month + "-" + str(check_in)
+    check_out_date = year + "-" + month + "-" + str(check_out)
+    
 
     nights_spent = check_out - check_in
 
@@ -46,7 +57,7 @@ def main():
 
     print(f"Your stay for {nights_spent} night(s) is ZAR {total_cost:,.2f}")
 
-    book_room(number)
+    book_room(number, check_in_date, check_out_date)
 
 
 def open_available_rooms():
@@ -96,7 +107,7 @@ def stay_cost(nights, price_per_night):
 
     return nights * price_per_night
 
-def book_room(room_num):
+def book_room(room_num, check_in, check_out):
 
     available = open_available_rooms()
 
@@ -107,12 +118,16 @@ def book_room(room_num):
 
         if room["number"] == room_num:
 
+            room["check in"] = check_in
+            room["check out"] = check_out
+
             unavailable.append(room)
-            room_type = room['type']
+            room_type = room["type"]
+            
 
             with open("unavailable.csv", "w", newline="") as file:
 
-                writer = csv.DictWriter(file, fieldnames=["number", "type", "price"])
+                writer = csv.DictWriter(file, fieldnames=["number", "type", "price", "check in", "check out"])
                 writer.writeheader()
 
                 # writer.writerows(unavailable)
