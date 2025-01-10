@@ -7,45 +7,37 @@ table = PrettyTable(["Room Number", "Room Type", "Price"])
 
 def main():
 
-    while True:
+    guest = {}
 
+    name = input("Please enter your name: ")
 
-        guest = {}
+    surname = input("Please enter your surname: ")
 
-        name = input("Please enter your name ")
+    email = input("Please enter your email adddress: ")
 
-        surname = input("Please enter your surname ")
+    guest["name"] = name
 
-        email = input("Please enter your email adddress ")
+    guest["surname"] = surname
 
-        guest["name"] = name
+    guest["email"] = email
 
-        guest["surname"] = surname
+    
 
-        guest["email"] = email
+    clients = [guest]
 
-        
+    register(clients)
 
-        clients = [guest]
+    print("Please login to book a room with us")
 
-        register(clients)
+    login_name = input("Enter your name ")
 
-        print("Please login to book a room with us")
+    login_email = input("Enter your email ")
 
-        login_name = input("Enter your name ")
-
-        login_email = input("Enter your email ")
-
-        if client_login(clients, login_name, login_email):
-            print("Login successful")
-            while not client_login(clients, login_name, login_email):
-                print("Details do not exist, try again.")
-            break
+    if client_login(clients, login_name, login_email):
+        print("Login successful")
+            
 
         
-
-
-
     available = open_available_rooms()
 
     unavailable = open_unavailable_rooms()
@@ -74,7 +66,6 @@ def main():
 
     try:
 
-
         check_in = int(input("Please choose a check-in date: "))
 
     except ValueError:
@@ -98,7 +89,26 @@ def main():
 
     book_room(number, check_in_date, check_out_date)
 
+def open_client_list():
+
+    try:
+
+        with open("clientele.csv", "r") as file:
+
+            reader = csv.DictReader(file)
+
+            guests = [row for row in reader]
+
+            return guests
+
+    except FileNotFoundError:
+
+        return []
+
+
 def register(guest_list):
+
+    guest_list  = open_client_list()
 
     with open("guests.csv", "w", newline="") as guests:
 
