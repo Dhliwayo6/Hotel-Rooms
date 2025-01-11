@@ -1,4 +1,5 @@
 import csv
+import sys
 import calendar
 from datetime  import date
 from prettytable import PrettyTable
@@ -7,7 +8,10 @@ table = PrettyTable(["Room Number", "Room Type", "Price"])
 
 def main():
 
-    guest = {}
+
+    print("Welcome to the Grand Ladora \nPlease register before making a booking")
+
+    print()
 
     name = input("Please enter your name: ")
 
@@ -15,29 +19,31 @@ def main():
 
     email = input("Please enter your email adddress: ")
 
-    guest["name"] = name
+    register(name, surname, email)
 
-    guest["surname"] = surname
 
-    guest["email"] = email
-
-    
-
-    clients = [guest]
-
-    register(clients)
+    print(f"Guest {name} successfully registered")
 
     print("Please login to book a room with us")
+    
 
-    login_name = input("Enter your name ")
+    login_name = input("Enter your name: ")
 
-    login_email = input("Enter your email ")
+    login_email = input("Enter your email: ")
 
-    if client_login(clients, login_name, login_email):
+    if client_login(login_name, login_email):
         print("Login successful")
-            
+       
 
-        
+    while not client_login(login_name, login_email):
+
+        print("Name and/or email do not exist")
+
+        login_name = input("Enter your name: ")
+
+        login_email = input("Enter your email: ")
+
+
     available = open_available_rooms()
 
     unavailable = open_unavailable_rooms()
@@ -89,7 +95,7 @@ def main():
 
     book_room(number, check_in_date, check_out_date)
 
-def open_client_list():
+def open_client_list() -> (list[dict[str]]):
 
     try:
 
@@ -97,40 +103,50 @@ def open_client_list():
 
             reader = csv.DictReader(file)
 
-            guests = [row for row in reader]
+            return [row for row in reader]
 
-            return guests
 
     except FileNotFoundError:
 
         return []
 
 
-def register(guest_list):
+def register(name: str, surname: str, email: str) -> (list | None):
 
-    guest_list  = open_client_list()
+    guest_list = open_client_list()
 
-    with open("guests.csv", "w", newline="") as guests:
+    try:
 
-        writer = csv.DictWriter(guests, fieldnames=["name", "surname", "email"])
-        writer.writeheader()
+        with open("guests.csv", "a", newline="") as guests:
 
-        writer.writerows(guest_list)
+            writer = csv.DictWriter(guests, fieldnames=["name", "surname", "email"])
+            writer.writeheader()
 
-def client_login(guest_list, name, email):
+            writer.writerow({"name":name, "surname": surname, "email" : email})
+
+    except FileNotFoundError:
+
+        return []
+
+def client_login(name: str, email: str) -> (bool | list) :
     
 
-    for item in guest_list:
-        print(item)
+    try:
 
-        if item["name"] == name and item["email"] == email:
-            return True
-       
-    return False
+        with open("guests.csv", "r") as file:
+            reader = csv.reader(file)
 
+            for line in reader:
+                if line[0] == name and line[2] == email:
+                    return True
+                
+        return False
+    
+    except FileNotFoundError:
+        print("File not found")
+        return []
 
-
-def open_available_rooms():
+def open_available_rooms()  -> (list[dict[str]]):
 
     try:
 
@@ -168,16 +184,16 @@ def show_available_rooms(available, unavailable):
 
     return [room for room in available if room["number"] not in unavailable_room_number]
 
-def room_price(available, room_number):
+def room_price(available: list[dict[str]], room_number: str) -> (int | None):
     for room in available:
         if room["number"] == room_number:
             return int(room['price'])
 
-def stay_cost(nights, price_per_night):
+def stay_cost(nights: int, price_per_night: int) -> int:
 
     return nights * price_per_night
 
-def book_room(room_num, check_in, check_out):
+def book_room(room_num: str, check_in: str, check_out: str) -> None:
 
     available = open_available_rooms()
 
