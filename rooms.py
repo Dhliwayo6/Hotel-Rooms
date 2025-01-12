@@ -13,35 +13,73 @@ def main():
 
     print()
 
-    name = input("Please enter your name: ")
-
-    surname = input("Please enter your surname: ")
-
-    email = input("Please enter your email adddress: ")
-
-    register(name, surname, email)
+    while True:
 
 
-    print(f"Guest {name} successfully registered")
+        print("1.Register \n2. Login")
 
-    print("Please login to book a room with us")
-    
+        entry = input("Choose an option: ")
 
-    login_name = input("Enter your name: ")
+        if entry == "1" or entry == "Register":
 
-    login_email = input("Enter your email: ")
+            name = input("Please enter your name: ")
 
-    if client_login(login_name, login_email):
-        print("Login successful")
-       
+            surname = input("Please enter your surname: ")
 
-    while not client_login(login_name, login_email):
+            email = input("Please enter your email adddress: ")
 
-        print("Name and/or email do not exist")
+            register(name, surname, email)
 
-        login_name = input("Enter your name: ")
+            print(f"Guest {name} {surname} successfully registered\nProceed to login now")
 
-        login_email = input("Enter your email: ")
+
+        elif entry == "2" or entry == "Login":
+            login_name = input("Enter your name: ")
+
+            login_email = input("Enter your email: ")
+
+            if client_login(login_name, login_email):
+                print("Login successful!")
+                break
+            else:
+                print("Login failed! \nPlease check your details or register")
+
+        else:
+            print("Invalid selection")    
+
+    current_date = date.today()
+
+    current_date = str(current_date)
+
+    year, month, day = current_date.split("-")
+
+    while True:
+
+        try:
+
+            print(calendar.month(int(year), int(month)))
+
+            check_in = int(input("Please choose a check-in date: "))
+            break
+
+        except ValueError:
+
+            print("Not a valid date, try again.")
+
+
+    while True:
+
+        try:
+
+
+            print(calendar.month(int(year), int(month)))
+
+            check_out = int(input("Please choose a check-out date: "))
+            break
+
+        except ValueError:
+
+            print(f"{check_out} is not a valid date")
 
 
     available = open_available_rooms()
@@ -57,31 +95,10 @@ def main():
 
     print(table)
 
-    current_date = date.today()
-
-    current_date = str(current_date)
-
-    year, month, day = current_date.split("-")
-
-
     number = input("Pick a room number: ")
 
     price = room_price(available, number)
 
-    print(calendar.month(int(year), int(month)))
-
-    try:
-
-        check_in = int(input("Please choose a check-in date: "))
-
-    except ValueError:
-
-        print("Not a valid date")
-
-
-    print(calendar.month(int(year), int(month)))
-
-    check_out = int(input("Please choose a check-out date: "))
 
     check_in_date = year + "-" + month + "-" + str(check_in)
     check_out_date = year + "-" + month + "-" + str(check_out)
@@ -99,7 +116,7 @@ def open_client_list() -> (list[dict[str]]):
 
     try:
 
-        with open("clientele.csv", "r") as file:
+        with open("guests.csv", "r") as file:
 
             reader = csv.DictReader(file)
 
@@ -120,7 +137,9 @@ def register(name: str, surname: str, email: str) -> (list | None):
         with open("guests.csv", "a", newline="") as guests:
 
             writer = csv.DictWriter(guests, fieldnames=["name", "surname", "email"])
-            writer.writeheader()
+
+            if len(guest_list) == 0:
+                writer.writeheader()
 
             writer.writerow({"name":name, "surname": surname, "email" : email})
 
@@ -134,10 +153,12 @@ def client_login(name: str, email: str) -> (bool | list) :
     try:
 
         with open("guests.csv", "r") as file:
-            reader = csv.reader(file)
+            reader = csv.DictReader(file)
+
+            
 
             for line in reader:
-                if line[0] == name and line[2] == email:
+                if line["name"] == name and line["email"] == email:
                     return True
                 
         return False
@@ -178,7 +199,7 @@ def open_unavailable_rooms():
 
         return []
 
-def show_available_rooms(available, unavailable):
+def show_available_rooms(available: list[dict[str]], unavailable: list[dict[str]]) -> list[dict[str]]:
 
     unavailable_room_number = [room["number"] for room in unavailable]
 
