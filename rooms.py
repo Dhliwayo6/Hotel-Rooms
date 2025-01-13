@@ -1,13 +1,16 @@
 import csv
 import sys
 import calendar
+import getpass
+import smtplib
+import uuid
+from passwords import pwd
 from datetime  import date
 from prettytable import PrettyTable
 
 table = PrettyTable(["Room Number", "Room Type", "Price"])
 
 def main():
-
 
     print("Welcome to the Grand Ladora \nPlease register before making a booking")
 
@@ -111,6 +114,39 @@ def main():
     print(f"Your stay for {nights_spent} night(s) is ZAR {total_cost:,.2f}")
 
     book_room(number, check_in_date, check_out_date)
+
+    HOST = "smtp.gmail.com"
+
+    PORT = 587
+
+    from_email = "thegrandladorahotel@gmail.com"
+
+    to_email = login_email
+
+    password = pwd
+
+    for room in available:
+
+        if room["number"] == number:
+            room_type = room["type"]
+
+    reservation_id = uuid.uuid4()
+
+    message = send_booking_confirmation(name, surname, check_in, check_out, room_type, total_cost, reservation_id, from_email)
+
+    smtp = smtplib.SMTP(HOST, PORT)
+
+    status_code, response = smtp.ehlo()
+    print(f"[*] Echoing the server: {status_code} {response}")
+
+    status_code, response = smtp.starttls()
+    print(f"[*] Starting TLS connection: {status_code} {response}")
+
+    status_code, response = smtp.login(from_email, password)
+    print(f"[*] Logging in: {status_code} {response}")
+
+    smtp.sendmail(from_email, to_email, message)
+    smtp.quit()
 
 def open_client_list() -> (list[dict[str]]):
 
@@ -237,16 +273,37 @@ def book_room(room_num: str, check_in: str, check_out: str) -> None:
                 writer = csv.DictWriter(file, fieldnames=["number", "type", "price", "check in", "check out"])
                 writer.writeheader()
 
-                # writer.writerows(unavailable)
-
                 for room in unavailable:
                     writer.writerow(room)
 
 
-                print(f"Room {room_num}, a {room_type} room booked!")
+                print(f"Room {room_num},a  {room_type} room booked!")
                 return
 
     print("Room not found")
+
+
+def send_booking_confirmation(name, surname, check_in, check_out, room_type, total_amount, reservation_number, from_email):
+
+    return f"""Subject: Booking Confirmation - The Grand Ladora
+
+    Dear {name},
+
+    Thank you for choosing The Grand Ladora!
+
+    We are delighted to confirm your booking with the following details:
+
+        Reservation Number: {reservation_number}
+        Check-in Date: {check_in}
+        Check-out Date: {check_out}
+        Room Type: {room_type}
+        Guest(s): {name} {surname}
+        Total Amount: ZAR {total_amount:,.2f}
+
+    We look forward to welcoming you. If you have any questions or need to make changes to your booking, feel free to contact us at {from_email} or 012 345 6789.
+
+    Warm regards,
+    The Grand Ladora Team"""
 
 if __name__ == "__main__":
     main()
