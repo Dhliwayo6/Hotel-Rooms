@@ -5,10 +5,11 @@ import getpass
 import smtplib
 import uuid
 from passwords import pwd
-from datetime  import date
+from datetime import date
 from prettytable import PrettyTable
 
 table = PrettyTable(["Room Number", "Room Type", "Price"])
+
 
 def main():
 
@@ -17,7 +18,6 @@ def main():
     print()
 
     while True:
-
 
         print("1.Register \n2. Login")
 
@@ -33,8 +33,9 @@ def main():
 
             register(name, surname, email)
 
-            print(f"Guest {name} {surname} successfully registered\nProceed to login now")
-
+            print(
+                f"Guest {name} {surname} successfully registered\nProceed to login now"
+            )
 
         elif entry == "2" or entry == "Login":
             login_name = input("Enter your name: ")
@@ -48,7 +49,7 @@ def main():
                 print("Login failed! \nPlease check your details or register")
 
         else:
-            print("Invalid selection")    
+            print("Invalid selection")
 
     current_date = date.today()
 
@@ -69,11 +70,9 @@ def main():
 
             print("Not a valid date, try again.")
 
-
     while True:
 
         try:
-
 
             print(calendar.month(int(year), int(month)))
 
@@ -84,7 +83,6 @@ def main():
 
             print(f"{check_out} is not a valid date")
 
-
     available = open_available_rooms()
 
     unavailable = open_unavailable_rooms()
@@ -94,7 +92,7 @@ def main():
     available_rooms_display = show_available_rooms(available, unavailable)
 
     for room in available_rooms_display:
-        table.add_row([room['number'], room['type'], room['price']])
+        table.add_row([room["number"], room["type"], room["price"]])
 
     print(table)
 
@@ -102,10 +100,8 @@ def main():
 
     price = room_price(available, number)
 
-
     check_in_date = year + "-" + month + "-" + str(check_in)
     check_out_date = year + "-" + month + "-" + str(check_out)
-    
 
     nights_spent = check_out - check_in
 
@@ -132,7 +128,16 @@ def main():
 
     reservation_id = uuid.uuid4()
 
-    message = send_booking_confirmation(name, surname, check_in, check_out, room_type, total_cost, reservation_id, from_email)
+    message = send_booking_confirmation(
+        name,
+        surname,
+        check_in_date,
+        check_out_date,
+        room_type,
+        total_cost,
+        reservation_id,
+        from_email,
+    )
 
     smtp = smtplib.SMTP(HOST, PORT)
 
@@ -148,7 +153,8 @@ def main():
     smtp.sendmail(from_email, to_email, message)
     smtp.quit()
 
-def open_client_list() -> (list[dict[str]]):
+
+def open_client_list() -> list[dict[str]]:
 
     try:
 
@@ -158,13 +164,12 @@ def open_client_list() -> (list[dict[str]]):
 
             return [row for row in reader]
 
-
     except FileNotFoundError:
 
         return []
 
 
-def register(name: str, surname: str, email: str) -> (list | None):
+def register(name: str, surname: str, email: str) -> list | None:
 
     guest_list = open_client_list()
 
@@ -177,33 +182,32 @@ def register(name: str, surname: str, email: str) -> (list | None):
             if len(guest_list) == 0:
                 writer.writeheader()
 
-            writer.writerow({"name":name, "surname": surname, "email" : email})
+            writer.writerow({"name": name, "surname": surname, "email": email})
 
     except FileNotFoundError:
 
         return []
 
-def client_login(name: str, email: str) -> (bool | list) :
-    
+
+def client_login(name: str, email: str) -> bool | list:
 
     try:
 
         with open("guests.csv", "r") as file:
             reader = csv.DictReader(file)
 
-            
-
             for line in reader:
                 if line["name"] == name and line["email"] == email:
                     return True
-                
+
         return False
-    
+
     except FileNotFoundError:
         print("File not found")
         return []
 
-def open_available_rooms()  -> (list[dict[str]]):
+
+def open_available_rooms() -> list[dict[str]]:
 
     try:
 
@@ -213,7 +217,7 @@ def open_available_rooms()  -> (list[dict[str]]):
             rooms = [row for row in reader]
 
             return rooms
-    
+
     except FileNotFoundError:
         print("File not found")
         return []
@@ -235,27 +239,32 @@ def open_unavailable_rooms():
 
         return []
 
-def show_available_rooms(available: list[dict[str]], unavailable: list[dict[str]]) -> list[dict[str]]:
+
+def show_available_rooms(
+    available: list[dict[str]], unavailable: list[dict[str]]
+) -> list[dict[str]]:
 
     unavailable_room_number = [room["number"] for room in unavailable]
 
     return [room for room in available if room["number"] not in unavailable_room_number]
 
-def room_price(available: list[dict[str]], room_number: str) -> (int | None):
+
+def room_price(available: list[dict[str]], room_number: str) -> int | None:
     for room in available:
         if room["number"] == room_number:
-            return int(room['price'])
+            return int(room["price"])
+
 
 def stay_cost(nights: int, price_per_night: int) -> int:
 
     return nights * price_per_night
+
 
 def book_room(room_num: str, check_in: str, check_out: str) -> None:
 
     available = open_available_rooms()
 
     unavailable = open_unavailable_rooms()
-
 
     for room in available:
 
@@ -266,24 +275,34 @@ def book_room(room_num: str, check_in: str, check_out: str) -> None:
 
             unavailable.append(room)
             room_type = room["type"]
-            
 
             with open("unavailable.csv", "w", newline="") as file:
 
-                writer = csv.DictWriter(file, fieldnames=["number", "type", "price", "check in", "check out"])
+                writer = csv.DictWriter(
+                    file,
+                    fieldnames=["number", "type", "price", "check in", "check out"],
+                )
                 writer.writeheader()
 
                 for room in unavailable:
                     writer.writerow(room)
 
-
-                print(f"Room {room_num},a  {room_type} room booked!")
+                print(f"Room {room_num}, a {room_type} room booked!")
                 return
 
     print("Room not found")
 
 
-def send_booking_confirmation(name, surname, check_in, check_out, room_type, total_amount, reservation_number, from_email):
+def send_booking_confirmation(
+    name,
+    surname,
+    check_in,
+    check_out,
+    room_type,
+    total_amount,
+    reservation_number,
+    from_email,
+):
 
     return f"""Subject: Booking Confirmation - The Grand Ladora
 
@@ -293,7 +312,7 @@ def send_booking_confirmation(name, surname, check_in, check_out, room_type, tot
 
     We are delighted to confirm your booking with the following details:
 
-        Reservation Number: {reservation_number}
+        Reservation Number: GL-{reservation_number}
         Check-in Date: {check_in}
         Check-out Date: {check_out}
         Room Type: {room_type}
@@ -304,6 +323,7 @@ def send_booking_confirmation(name, surname, check_in, check_out, room_type, tot
 
     Warm regards,
     The Grand Ladora Team"""
+
 
 if __name__ == "__main__":
     main()
