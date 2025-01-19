@@ -4,6 +4,7 @@ import calendar
 import getpass
 import smtplib
 import uuid
+import re
 from passwords import pwd
 from datetime import date
 from prettytable import PrettyTable
@@ -25,28 +26,35 @@ def main():
 
         if entry == "1" or entry == "Register":
 
-            name = input("Please enter your name: ")
+            name = input("Please enter your name: ").capitalize().strip()
 
-            surname = input("Please enter your surname: ")
+            surname = input("Please enter your surname: ").capitalize().strip()
 
-            email = input("Please enter your email adddress: ")
+            email = input("Please enter your email adddress: ").strip()
+            print()
+
+            if not is_valid_email(email):
+                print(f"{email} not a valid email address, Please try again!\n")
+                continue
 
             register(name, surname, email)
 
             print(
-                f"Guest {name} {surname} successfully registered\nProceed to login now"
+                f"Guest {name.capitalize()} {surname} successfully registered\nProceed to login now"
             )
 
         elif entry == "2" or entry == "Login":
-            login_name = input("Enter your name: ")
+            login_name = input("Enter your name: ").capitalize().strip()
 
-            login_email = input("Enter your email: ")
+            login_email = input("Enter your email: ").strip()
 
             if client_login(login_name, login_email):
                 print("Login successful!")
+                print()
                 break
             else:
                 print("Login failed! \nPlease check your details or register")
+                print()
 
         else:
             print("Invalid selection")
@@ -62,26 +70,36 @@ def main():
         try:
 
             print(calendar.month(int(year), int(month)))
+            print()
 
             check_in = int(input("Please choose a check-in date: "))
+            print()
+
+            print(calendar.month(int(year), int(month)))
+            print()
+
+            check_out = int(input("Please choose a check-out date: "))
+            print()
+
+            if check_in == check_out:
+                print(
+                    "You cannot check-out on the same day you check-in, Please try again!"
+                )
+                print()
+                continue
             break
 
         except ValueError:
 
             print("Not a valid date, try again.")
 
-    while True:
+    # while True:
 
-        try:
+    #     try:
 
-            print(calendar.month(int(year), int(month)))
+    #     except ValueError:
 
-            check_out = int(input("Please choose a check-out date: "))
-            break
-
-        except ValueError:
-
-            print(f"{check_out} is not a valid date")
+    #         print("Not a valid date")
 
     available = open_available_rooms()
 
@@ -167,6 +185,18 @@ def open_client_list() -> list[dict[str]]:
     except FileNotFoundError:
 
         return []
+
+
+def is_valid_email(email: str) -> bool:
+
+    if re.search(
+        r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+        email,
+        re.IGNORECASE,
+    ):
+        return True
+
+    return False
 
 
 def register(name: str, surname: str, email: str) -> list | None:
@@ -306,23 +336,23 @@ def send_booking_confirmation(
 
     return f"""Subject: Booking Confirmation - The Grand Ladora
 
-    Dear {name},
+            Dear {name},
 
-    Thank you for choosing The Grand Ladora!
+            Thank you for choosing The Grand Ladora!
 
-    We are delighted to confirm your booking with the following details:
+            We are delighted to confirm your booking with the following details:
 
-        Reservation Number: GL-{reservation_number}
-        Check-in Date: {check_in}
-        Check-out Date: {check_out}
-        Room Type: {room_type}
-        Guest(s): {name} {surname}
-        Total Amount: ZAR {total_amount:,.2f}
+                Reservation Number: GL-{reservation_number}
+                Check-in Date: {check_in}
+                Check-out Date: {check_out}
+                Room Type: {room_type}
+                Guest(s): {name} {surname}
+                Total Amount: ZAR {total_amount:,.2f}
 
-    We look forward to welcoming you. If you have any questions or need to make changes to your booking, feel free to contact us at {from_email} or 012 345 6789.
+            We look forward to welcoming you. If you have any questions or need to make changes to your booking, feel free to contact us at {from_email} or 012 345 6789.
 
-    Warm regards,
-    The Grand Ladora Team"""
+            Warm regards,
+            The Grand Ladora Team"""
 
 
 if __name__ == "__main__":
