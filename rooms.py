@@ -48,6 +48,10 @@ def main():
 
             login_email = input("Enter your email: ").strip()
 
+            if not is_valid_email(login_email):
+                print(f"{login_email} not a valid email address, Please try again!\n")
+                continue
+
             if client_login(login_name, login_email):
                 print("Login successful!")
                 print()
@@ -93,14 +97,6 @@ def main():
 
             print("Not a valid date, try again.")
 
-    # while True:
-
-    #     try:
-
-    #     except ValueError:
-
-    #         print("Not a valid date")
-
     available = open_available_rooms()
 
     unavailable = open_unavailable_rooms()
@@ -127,7 +123,7 @@ def main():
 
     print(f"Your stay for {nights_spent} night(s) is ZAR {total_cost:,.2f}")
 
-    book_room(number, check_in_date, check_out_date)
+    book_room(number, check_in_date, check_out_date, login_name, login_email)
 
     HOST = "smtp.gmail.com"
 
@@ -147,8 +143,7 @@ def main():
     reservation_id = uuid.uuid4()
 
     message = send_booking_confirmation(
-        name,
-        surname,
+        login_name,
         check_in_date,
         check_out_date,
         room_type,
@@ -290,7 +285,7 @@ def stay_cost(nights: int, price_per_night: int) -> int:
     return nights * price_per_night
 
 
-def book_room(room_num: str, check_in: str, check_out: str) -> None:
+def book_room(room_num: str, check_in: str, check_out: str, name: str, email: str) -> None:
 
     available = open_available_rooms()
 
@@ -302,6 +297,8 @@ def book_room(room_num: str, check_in: str, check_out: str) -> None:
 
             room["check in"] = check_in
             room["check out"] = check_out
+            room["name"] = name
+            room["email"] = email
 
             unavailable.append(room)
             room_type = room["type"]
@@ -310,7 +307,7 @@ def book_room(room_num: str, check_in: str, check_out: str) -> None:
 
                 writer = csv.DictWriter(
                     file,
-                    fieldnames=["number", "type", "price", "check in", "check out"],
+                    fieldnames=["number", "type", "price", "check in", "check out", "name", "email"],
                 )
                 writer.writeheader()
 
@@ -325,7 +322,6 @@ def book_room(room_num: str, check_in: str, check_out: str) -> None:
 
 def send_booking_confirmation(
     name,
-    surname,
     check_in,
     check_out,
     room_type,
@@ -346,7 +342,7 @@ def send_booking_confirmation(
                 Check-in Date: {check_in}
                 Check-out Date: {check_out}
                 Room Type: {room_type}
-                Guest(s): {name} {surname}
+                Guest(s): {name}
                 Total Amount: ZAR {total_amount:,.2f}
 
             We look forward to welcoming you. If you have any questions or need to make changes to your booking, feel free to contact us at {from_email} or 012 345 6789.
